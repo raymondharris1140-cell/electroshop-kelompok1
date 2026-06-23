@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'anymail',
     
     # Project apps
     'users.apps.UsersConfig',
@@ -45,6 +44,14 @@ INSTALLED_APPS = [
     'notifications.apps.NotificationsConfig',
     'dashboard.apps.DashboardConfig',
 ]
+
+# Add anymail only if installed (prevents crash if not in requirements)
+try:
+    import anymail
+    INSTALLED_APPS.append('anymail')
+    ANYMAIL_AVAILABLE = True
+except ImportError:
+    ANYMAIL_AVAILABLE = False
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -235,7 +242,7 @@ SIMPLE_JWT = {
 BREVO_API_KEY = env('BREVO_API_KEY', default='')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 
-if BREVO_API_KEY:
+if BREVO_API_KEY and ANYMAIL_AVAILABLE:
     # Anymail + Brevo API — no SMTP ports needed, uses HTTPS
     EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
     ANYMAIL = {
@@ -243,7 +250,7 @@ if BREVO_API_KEY:
     }
     DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=f'ElectroShop <{EMAIL_HOST_USER}>')
 elif EMAIL_HOST_USER:
-    # Fallback: SMTP (lokal/dev only, mungkin tidak bisa di Vercel)
+    # Fallback: SMTP
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
     EMAIL_PORT = env('EMAIL_PORT', cast=int, default=587)
