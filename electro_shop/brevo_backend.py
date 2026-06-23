@@ -1,8 +1,3 @@
-"""
-Custom Brevo Email Backend menggunakan Brevo HTTP API.
-Tidak memerlukan django-anymail atau library tambahan apapun.
-Menggunakan urllib bawaan Python — dijamin jalan di Vercel.
-"""
 import json
 import logging
 from urllib.request import Request, urlopen
@@ -15,13 +10,7 @@ logger = logging.getLogger(__name__)
 
 BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email'
 
-
 class BrevoEmailBackend(BaseEmailBackend):
-    """
-    Email backend that sends emails via Brevo's HTTP API.
-    Requires BREVO_API_KEY in Django settings or environment.
-    """
-
     def __init__(self, api_key=None, fail_silently=False, **kwargs):
         super().__init__(fail_silently=fail_silently, **kwargs)
         self.api_key = api_key or getattr(settings, 'BREVO_API_KEY', '')
@@ -45,10 +34,7 @@ class BrevoEmailBackend(BaseEmailBackend):
         return sent_count
 
     def _send_one(self, message):
-        # Build recipient list
         to_list = [{'email': addr} for addr in message.to]
-
-        # Parse sender
         from_email = message.from_email or settings.DEFAULT_FROM_EMAIL
         if '<' in from_email and '>' in from_email:
             name_part = from_email.split('<')[0].strip()
@@ -57,14 +43,12 @@ class BrevoEmailBackend(BaseEmailBackend):
         else:
             sender = {'email': from_email}
 
-        # Build payload
         payload = {
             'sender': sender,
             'to': to_list,
             'subject': message.subject,
         }
 
-        # Check for HTML content
         html_content = None
         if hasattr(message, 'alternatives'):
             for content, mimetype in message.alternatives:
@@ -77,7 +61,6 @@ class BrevoEmailBackend(BaseEmailBackend):
         else:
             payload['textContent'] = message.body
 
-        # Send via Brevo API
         data = json.dumps(payload).encode('utf-8')
         req = Request(BREVO_API_URL, data=data, method='POST')
         req.add_header('accept', 'application/json')
@@ -87,16 +70,13 @@ class BrevoEmailBackend(BaseEmailBackend):
         try:
             response = urlopen(req, timeout=15)
             result = json.loads(response.read().decode('utf-8'))
-            logger.info(f'[BrevoBackend] Email sent successfully: {result}')
             return True
         except HTTPError as e:
             error_body = e.read().decode('utf-8') if e.fp else str(e)
-            logger.error(f'[BrevoBackend] HTTP {e.code}: {error_body}')
             if not self.fail_silently:
                 raise Exception(f'Brevo API error {e.code}: {error_body}')
             return False
         except URLError as e:
-            logger.error(f'[BrevoBackend] URL Error: {e.reason}')
             if not self.fail_silently:
                 raise
             return False
