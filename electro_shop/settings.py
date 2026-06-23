@@ -238,16 +238,13 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
-# Email Backend Settings — Brevo HTTP API via django-anymail (works on Vercel)
+# Email Backend Settings — Brevo HTTP API (works on Vercel)
 BREVO_API_KEY = env('BREVO_API_KEY', default='')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 
-if BREVO_API_KEY and ANYMAIL_AVAILABLE:
-    # Anymail + Brevo API — no SMTP ports needed, uses HTTPS
-    EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
-    ANYMAIL = {
-        'BREVO_API_KEY': BREVO_API_KEY,
-    }
+if BREVO_API_KEY:
+    # Use our custom Brevo HTTP API backend - uses port 443 HTTPS, never blocked by Vercel
+    EMAIL_BACKEND = 'electro_shop.brevo_backend.BrevoEmailBackend'
     DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=f'ElectroShop <{EMAIL_HOST_USER}>')
 elif EMAIL_HOST_USER:
     # Fallback: SMTP
