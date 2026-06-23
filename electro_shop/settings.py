@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'anymail',
     
     # Project apps
     'users.apps.UsersConfig',
@@ -220,11 +221,19 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
-# Email Backend Settings
+# Email Backend Settings — Brevo HTTP API via django-anymail (works on Vercel)
+BREVO_API_KEY = env('BREVO_API_KEY', default='')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 
-if EMAIL_HOST_USER:
-    # Real SMTP — OTP emails will be delivered to real inboxes
+if BREVO_API_KEY:
+    # Anymail + Brevo API — no SMTP ports needed, uses HTTPS
+    EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
+    ANYMAIL = {
+        'BREVO_API_KEY': BREVO_API_KEY,
+    }
+    DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=f'ElectroShop <{EMAIL_HOST_USER}>')
+elif EMAIL_HOST_USER:
+    # Fallback: SMTP (lokal/dev only, mungkin tidak bisa di Vercel)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
     EMAIL_PORT = env('EMAIL_PORT', cast=int, default=587)
