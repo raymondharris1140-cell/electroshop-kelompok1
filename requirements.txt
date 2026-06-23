@@ -10,3 +10,4 @@ django-environ
 xhtml2pdf
 openpyxl
 gunicorn
+django-anymail[brevo]
