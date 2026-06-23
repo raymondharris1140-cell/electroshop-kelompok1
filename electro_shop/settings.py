@@ -267,3 +267,13 @@ CORS_ALLOW_ALL_ORIGINS = True # Change to specific origins in production
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'product_list'
 LOGOUT_REDIRECT_URL = 'product_list'
+
+# Cookie-based Sessions (keeps user logged in across Vercel serverless containers)
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+
+# Trusted origins for CSRF protection when DEBUG=False on Vercel
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'http://localhost',
+    'http://127.0.0.1',
+]
