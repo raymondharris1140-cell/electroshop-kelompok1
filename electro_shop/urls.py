@@ -13,6 +13,6 @@ urlpatterns = [
     path('api/', include('api.urls')), # REST API for AJAX and dynamic calls
 ]
 
-if settings.DEBUG:
+if settings.DEBUG or os.environ.get('VERCEL'):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
