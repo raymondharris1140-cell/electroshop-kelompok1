@@ -47,9 +47,12 @@ class RegisterView(FormView):
             # Jika email gagal terkirim, tetap simpan ke session agar bisa kirim ulang
             self.request.session['otp_user_id'] = user.id
             self.request.session['otp_email'] = user.email
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"[OTP EMAIL ERROR] {type(e).__name__}: {e}")
             messages.warning(
                 self.request,
-                "Registrasi berhasil, namun email OTP gagal dikirim. Gunakan tombol 'Kirim Ulang OTP'."
+                f"Registrasi berhasil, namun email OTP gagal dikirim. Error: {type(e).__name__}: {e} — Gunakan tombol 'Kirim Ulang OTP'."
             )
         return redirect('otp_verify')
 
