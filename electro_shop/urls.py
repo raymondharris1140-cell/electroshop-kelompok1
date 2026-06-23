@@ -1,16 +1,17 @@
+import os
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin-django/', admin.site.urls), # Django built-in admin site
-    path('admin/', include('dashboard.urls')), # Custom responsive Admin Dashboard
-    path('', include('products.urls')), # Catalog, reviews
-    path('', include('users.urls')), # Profile, addresses, auth
-    path('cart/', include('orders.urls')), # Cart, orders, checkout
-    path('payments/', include('payments.urls')), # Payment simulation
-    path('api/', include('api.urls')), # REST API for AJAX and dynamic calls
+    path('admin-django/', admin.site.urls),
+    path('admin/', include('dashboard.urls')),
+    path('', include('products.urls')),
+    path('', include('users.urls')),
+    path('cart/', include('orders.urls')),
+    path('payments/', include('payments.urls')),
+    path('api/', include('api.urls')),
 ]
 
 if settings.DEBUG or os.environ.get('VERCEL'):
