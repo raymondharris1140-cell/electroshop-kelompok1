@@ -82,9 +82,15 @@ WSGI_APPLICATION = 'electro_shop.wsgi.application'
 ASGI_APPLICATION = 'electro_shop.asgi.application'
 
 # Database Configuration
-# Fallback to SQLite if DB credentials are not set in .env
+# Use DATABASE_URL (e.g. from Neon/Supabase) if set, otherwise fallback to split settings or SQLite
+DATABASE_URL = env('DATABASE_URL', default='')
 DB_NAME = env('DB_NAME', default='')
-if DB_NAME:
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': env.db('DATABASE_URL')
+    }
+elif DB_NAME:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -105,6 +111,7 @@ else:
             'NAME': SQLITE_DB_PATH,
             'OPTIONS': {
                 'timeout': 60,
+                'transaction_mode': 'IMMEDIATE',
             },
         }
     }
